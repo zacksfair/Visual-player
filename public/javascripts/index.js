@@ -3,7 +3,7 @@ function $(s){
 }
 var lis = $("#list li");
 
-var size = 128;
+var size = 32;
 var box = $("#box")[0];
 var height,width;
 var canvas = document.createElement("canvas");
@@ -52,7 +52,8 @@ function getDots(){
 		Dots.push({
 			x:x,
 			y:y,
-			color:color
+			color:color,
+			cap:0
 		})
 	}
 }
@@ -73,14 +74,24 @@ window.onresize = resize;
 function draw(arr){
 	ctx.clearRect(0,0,width,height);
 	var w = width/size;
+	var cw = w*0.6;
+	var capH = cw>10?10:cw;
 	ctx.fillStyle = line;
 	for(var i = 0;i < size ;i++){
+			var o =Dots[i];
 		if(draw.type =="column"){
 			var h =arr[i]/ 256 * height;
-			ctx.fillRect(w*i,height - h,w*0.6,h);
+			ctx.fillRect(w*i,height - h,cw,h);
+			ctx.fillRect(w * i, height - (o.cap + capH), cw, capH); //绘制小帽
+			o.cap--;
+			if (o.cap < 0) { // 没点击歌曲时小帽的初始位置
+				o.cap = 0;
+			}
+			if (h > 0 && o.cap < h + 40) { // 保持小帽和矩形条的距离是40
+				o.cap = h + 40 > height - capH ? height - capH : h + 40;
+			}
 		}else if(draw.type == "dot"){
 			ctx.beginPath();
-			var o =Dots[i];
 			var r =arr[i]/256 *50;
 			ctx.arc(o.x, o.y, r, 0, Math.PI * 2, true);
 			var g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,r);
